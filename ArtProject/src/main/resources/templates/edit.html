@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>A View of Mind : 회원정보 수정</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <style>
+    /* 색상 및 공통 변수 정의 */
+    :root {
+      --navy: #13315E;  /* 주 색상 (네이비) */
+      --line: #d8dee8;  /* 입력창 기본 테두리 */
+      --muted: #8b97a8; /* 흐릿한 텍스트 */
+      --danger: #E45742; /* 오류 표시 색상 */
+    }
+
+    * { box-sizing: border-box; }
+
+    /* 기본 페이지 스타일 */
+    body {
+      margin: 0;
+      background: #fff;
+      font-family: "Noto Sans KR", sans-serif;
+      color: var(--navy);
+    }
+
+    /* 화면 중앙 정렬 레이아웃 */
+    .page-wrap {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 28px;
+    }
+
+    /* 수정 카드 영역 */
+    .edit-card {
+      width: 100%;
+      max-width: 420px;
+    }
+
+    /* 상단 제목 */
+    .brand-title {
+      text-align: center;
+      font-weight: 800;
+      font-size: 32px;
+      margin-bottom: 28px;
+    }
+
+    /* 입력 필드 그룹 */
+    .pill-group {
+      position: relative;
+      margin-bottom: 10px;
+    }
+
+    /* 입력 필드 라벨 */
+    .pill-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
+      margin: 0 0 8px 22px;
+    }
+
+    /* 둥근 입력창 스타일 */
+    .pill-control {
+      width: 100%;
+      height: 60px;
+      border-radius: 28px;
+      border: 2px solid var(--line);
+      padding: 0 22px;
+      font-size: 15px;
+    }
+
+    /* 포커스 시 네이비색 테두리 */
+    .pill-control:focus {
+      outline: none;
+      border-color: var(--navy);
+    }
+
+    .pill-control::placeholder { color: var(--muted); }
+
+    /* 읽기 전용 필드 스타일 (아이디 등) */
+    .pill-control[readonly] {
+      background: #f4f6fa;
+      color: var(--muted);
+      cursor: not-allowed;
+    }
+
+    /* 값이 입력된 상태 */
+    .pill-control.is-filled { border-color: var(--navy); }
+
+    /* 오류 발생 시 테두리 색상 변경 */
+    .pill-control.is-error {
+      border-color: var(--danger);
+      color: var(--danger);
+    }
+
+    /* 에러 문구 표시 */
+    .field-error {
+      display: none;
+      font-size: 12px;
+      color: var(--danger);
+      margin: 8px 0 0 22px;
+      font-weight: 600;
+    }
+
+    /* 부모 요소에 .is-error가 있으면 문구 노출 */
+    .pill-group:has(.is-error) .field-error {
+      display: block;
+    }
+
+    /* 저장 버튼 */
+    .btn-save {
+      margin-top: 24px;
+      width: 100%;
+      height: 60px;
+      border-radius: 28px;
+      border: 0;
+      background: var(--navy);
+      color: #fff;
+      font-size: 17px;
+      font-weight: 400;
+      cursor: pointer;
+    }
+
+    .btn-save:hover { font-weight: 600; }
+    .btn-save:focus { outline: none; }
+
+    /* 하단 메인 이동 링크 */
+    .bottom-link {
+      margin-top: 18px;
+	  margin-bottom: 20px;
+      text-align: center;
+      font-size: 13px;
+    }
+
+    .bottom-link a {
+      color: var(--muted);
+      text-decoration: none;
+    }
+
+    .bottom-link a:hover {
+      color: var(--navy);
+      font-weight: 600;
+    }
+
+    /* 커스텀 토스트 알림 */
+    .custom-toast {
+      position: fixed;
+      bottom: 32px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      min-width: 280px;
+      max-width: 90%;
+      padding: 14px 22px;
+      border-radius: 24px;
+      background: #fff;
+      border: 1.5px solid var(--danger);
+      color: var(--danger);
+      font-size: 14px;
+      font-weight: 600;
+      text-align: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: all .35s ease;
+      z-index: 9999;
+    }
+
+    .custom-toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page-wrap">
+    <div class="edit-card">
+      <div class="brand-title">회원정보 수정</div>
+
+      <form th:action="@{/user/edit}" method="post" novalidate>
+        
+        <div class="pill-group">
+          <label>아이디</label>
+          <input type="text" class="pill-control" th:value="${user.username}" readonly>
+        </div>
+
+        <div class="pill-group">
+          <label>이름</label>
+          <input type="text" id="name" name="name" class="pill-control" th:value="${user.name}" placeholder="이름">
+          <div class="field-error" id="name-error">이름을 입력해주세요.</div>
+        </div>
+
+        <div class="pill-group">
+          <label>현재 비밀번호</label>
+          <input type="password" id="currentPassword" name="currentPassword" class="pill-control" placeholder="현재 비밀번호">
+          <div class="field-error" id="currentPassword-error">현재 비밀번호가 올바르지 않습니다.</div>
+        </div>
+
+        <div class="pill-group">
+          <label>새 비밀번호</label>
+          <input type="password" id="newPassword" name="newPassword" class="pill-control" placeholder="새 비밀번호 (8자 이상)">
+          <div class="field-error" id="newPassword-error">비밀번호는 8자 이상이어야 합니다.</div>
+        </div>
+
+        <div class="pill-group">
+          <label>새 비밀번호 확인</label>
+          <input type="password" id="confirmPassword" name="confirmPassword" 
+                 class="pill-control" th:classappend="${confirmPasswordError} ? 'is-error' : ''" 
+                 placeholder="새 비밀번호 확인">
+          <div class="field-error" id="confirmPassword-error" th:if="${confirmPasswordError}">
+            새 비밀번호가 일치하지 않습니다.
+          </div>
+        </div>
+
+        <div class="pill-group">
+          <label>이메일</label>
+          <input type="email" id="email" name="email" class="pill-control" th:value="${user.email}" placeholder="이메일">
+          <div class="field-error" id="email-error">유효한 이메일 주소를 입력해주세요.</div>
+        </div>
+
+        <div class="pill-group">
+          <label>휴대전화번호</label>
+          <input type="text" id="phonenumber" name="phonenumber" class="pill-control" th:value="${user.phonenumber}" placeholder="휴대전화번호">
+          <div class="field-error" id="phonenumber-error">하이픈(-) 없이 숫자만 입력해주세요.</div>
+        </div>
+
+        <button type="submit" class="btn-save" id="saveBtn">저장하기</button>
+      </form>
+
+      <div class="bottom-link">
+        <a href="/main">메인으로 돌아가기</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="editSuccessModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false" th:if="${editSuccess}">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-body text-center py-5">
+          <i class="bi bi-check-circle-fill text-success" style="font-size:3rem;"></i>
+          <h4 class="mt-3" style="color:#13315E; font-weight:700;">회원정보가 수정되었습니다.</h4>
+          <p class="text-muted mt-2">잠시 후 메인 화면으로 이동합니다.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="custom-toast">
+    <span id="toastMessage"></span>
+  </div>
+
+  <script th:inline="javascript">
+    // DOM 요소 캐시
+    const DOM = {
+      form: document.querySelector('form'),
+      saveBtn: document.getElementById('saveBtn'),
+      name: document.getElementById('name'),
+      email: document.getElementById('email'),
+      phonenumber: document.getElementById('phonenumber'),
+      currentPassword: document.getElementById('currentPassword'),
+      newPassword: document.getElementById('newPassword'),
+      confirmPassword: document.getElementById('confirmPassword'),
+      nameError: document.getElementById('name-error'),
+      emailError: document.getElementById('email-error'),
+      phonenumberError: document.getElementById('phonenumber-error'),
+      confirmPasswordError: document.getElementById('confirmPassword-error')
+    };
+
+    // 필수 입력 필드 관리
+    const requiredInputs = [DOM.name, DOM.email, DOM.phonenumber];
+    const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/;
+
+    // 입력창 상태 업데이트 (is-filled / is-error)
+    function updateInputState(input, valid, isSubmit) {
+      const value = input.value.trim();
+      const hasValue = value.length > 0;
+
+      if (!isSubmit && !hasValue) {
+        input.classList.remove('is-error', 'is-filled');
+        return;
+      }
+
+      input.classList.toggle('is-error', !valid);
+      input.classList.toggle('is-filled', hasValue && valid);
+    }
+
+    // 이름 유효성 검사
+    function validateName(isSubmit = false) {
+      const v = DOM.name.value.trim();
+      const valid = v.length > 0;
+      updateInputState(DOM.name, valid, isSubmit);
+      return valid;
+    }
+
+    // 새 비밀번호 유효성 검사 (입력했을 때만 8자 이상 체크)
+    function validateNewPassword(isSubmit = false) {
+      const v = DOM.newPassword.value.trim();
+      const valid = v.length >= 8 || v.length === 0;
+      updateInputState(DOM.newPassword, valid, isSubmit);
+      return valid;
+    }
+
+    // 비밀번호 확인 유효성 검사
+    function validateConfirmPassword(isSubmit = false) {
+      const v = DOM.confirmPassword.value.trim();
+      const newPwd = DOM.newPassword.value.trim();
+      let valid = true;
+
+      if (newPwd.length > 0) {
+        if (v.length === 0) {
+          if (isSubmit && DOM.confirmPasswordError) DOM.confirmPasswordError.textContent = '비밀번호를 다시 입력해주세요.';
+          valid = false;
+        } else if (v !== newPwd) {
+          if (isSubmit && DOM.confirmPasswordError) DOM.confirmPasswordError.textContent = '비밀번호가 일치하지 않습니다.';
+          valid = false;
+        }
+      }
+
+      updateInputState(DOM.confirmPassword, valid, isSubmit);
+      return valid;
+    }
+
+    // 이메일 유효성 검사
+    function validateEmail(isSubmit = false) {
+      const v = DOM.email.value.trim();
+      let valid = true;
+
+      if (v.length === 0) {
+        if (isSubmit) DOM.emailError.textContent = '이메일을 입력해주세요.';
+        valid = false;
+      } else if (!emailRegex.test(v)) {
+        DOM.emailError.textContent = '영문 이메일 형식만 사용할 수 있습니다.';
+        valid = false;
+      }
+
+      updateInputState(DOM.email, valid, isSubmit);
+      return valid;
+    }
+
+    // 전화번호 유효성 검사
+    function validatePhonenumber(isSubmit = false) {
+      const v = DOM.phonenumber.value.trim();
+      const valid = /^\d{10,11}$/.test(v);
+      updateInputState(DOM.phonenumber, valid, isSubmit);
+      return valid;
+    }
+
+    // 모든 필수 값이 채워졌는지 확인하여 저장 버튼 활성화
+    function checkFilled() {
+      const canSubmit = requiredInputs.every(i => i.classList.contains('is-filled'));
+      DOM.saveBtn.classList.toggle('is-filled', canSubmit);
+    }
+
+    // 실시간 입력 처리 핸들러
+    function handleInput(e) {
+      if (e.target === DOM.name) validateName(false);
+      if (e.target === DOM.email) validateEmail(false);
+      if (e.target === DOM.phonenumber) validatePhonenumber(false);
+      if (e.target === DOM.newPassword) {
+        validateNewPassword(false);
+        validateConfirmPassword(false);
+      }
+      if (e.target === DOM.confirmPassword) validateConfirmPassword(false);
+
+      checkFilled();
+    }
+
+    // 폼 제출 처리 핸들러
+    function handleSubmit(e) {
+      const baseValid = validateName(true) & validateEmail(true) & validatePhonenumber(true);
+      const passwordValid = validateNewPassword(true) & validateConfirmPassword(true);
+
+      if (!baseValid || !passwordValid) {
+        e.preventDefault(); // 유효하지 않으면 폼 전송 중단
+      }
+    }
+
+    // 토스트 메시지 노출 함수
+    function showToast(message) {
+      const toast = document.getElementById('toast');
+      const toastMessage = document.getElementById('toastMessage');
+      if (!toast || !toastMessage) return;
+
+      toastMessage.textContent = message;
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2500);
+    }
+
+    // 이벤트 리스너 초기화
+    function init() {
+      requiredInputs.forEach(i => {
+        i.addEventListener('input', handleInput);
+        i.addEventListener('compositionend', handleInput);
+      });
+      
+      DOM.newPassword.addEventListener('input', handleInput);
+      DOM.confirmPassword.addEventListener('input', handleInput);
+      DOM.form.addEventListener('submit', handleSubmit);
+
+      // 기존 데이터가 있는 필드 초기 상태 설정
+      requiredInputs.forEach(i => {
+        if (i.value.trim()) i.classList.add('is-filled');
+      });
+      checkFilled();
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+
+  <script th:if="${editSuccess}">
+    document.addEventListener('DOMContentLoaded', () => {
+      const modalEl = document.getElementById('editSuccessModal');
+      if (modalEl) {
+        const modal = new bootstrap.Modal(modalEl);
+        modal.show();
+        setTimeout(() => { window.location.href = '/main'; }, 1500);
+      }
+    });
+  </script>
+  
+  <script th:if="${errorMessage}">
+    document.addEventListener('DOMContentLoaded', () => {
+      showToast(/*[[${errorMessage}]]*/ '에러가 발생했습니다.');
+    });
+  </script>
+</body>
+</html>

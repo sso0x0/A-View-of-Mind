@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>A View of Mind : 로그인</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+  <style>
+    /* 색상 및 공통 변수 정의 */
+    :root{
+      --navy:#13315E; /* 주 색상 (네이비) */
+      --navy-2:#0f2f56; 
+      --line:#d8dee8; /* 입력창 기본 테두리 색상 */
+      --muted:#8b97a8; /* 흐릿한 텍스트 색상 */
+      --danger:#E45742; /* 오류 표시 색상 */
+    }
+
+    /* 기본 페이지 스타일 */
+    body{
+      background:#fff;
+      /* 시스템 기본 폰트 설정 */
+      font-family: "inter";
+    }
+
+    /* 화면 중앙 정렬 레이아웃 */
+    .page-wrap{
+      min-height:100vh; /* 화면 전체 높이 사용 */
+      display:flex;
+      align-items:center; /* 세로 중앙 정렬 */
+      justify-content:center; /* 가로 중앙 정렬 */
+      padding:28px;
+    }
+	
+	/* 로그인 카드 영역 */
+    .login-card{
+      width:min(420px, 100%); /* 최대 420px로 너비 제한 */
+      border:0;
+    }
+
+	/* 브랜드 타이틀 */
+    .brand-title{
+      text-align:center;
+      font-weight:800;
+      color:var(--navy);
+      margin-bottom:28px;
+      font-size:32px;
+    }
+
+    /* 입력 필드 그룹 */
+    .pill-group{
+      position:relative; /* 에러 메시지 배치 기준 */
+      margin-bottom:12px;
+    }
+
+	/* 입력창 */
+    .pill-control{
+      height:60px;
+      border-radius:28px;
+      border:2px solid var(--line);
+      padding:0 48px 0 22px; /* 오른쪽 아이콘 공간용 */
+      font-size:15px;
+      box-shadow:none !important;
+    }
+
+	/* 포커스 시 네이비색 테두리 */
+    .pill-control:focus{
+      outline:none;
+      box-shadow:none;
+      border-color:var(--navy);
+    }
+
+	/* placeholder 텍스트 색 */
+    .pill-control::placeholder{ color:var(--muted); }
+
+    /* 값이 입력된 상태 (네이비색) */
+    .pill-control.is-filled{ border-color:var(--navy); }
+
+    /* 오류 상태 */
+    .pill-control.is-error{
+      border-color:var(--danger);
+      color:var(--danger);
+    }
+	
+	/* 오류 상태 placeholder 색 */
+    .pill-control.is-error::placeholder{ color:var(--danger); }
+
+    /* 에러 문구 */
+    .field-error{
+      display:none;
+      font-size:12px;
+      color:var(--danger);
+      margin:8px 0 0 22px;
+      font-weight:600;
+    }
+
+    /* 입력창이 error 상태일 때만 문구 표시 */
+    .pill-group:has(.pill-control.is-error) .field-error{ display:block; }
+
+    /* 아이콘 */
+    .input-wrap{ position:relative; }
+
+    /* 비밀번호 보기, 숨기기 버튼 */
+    .icon-btn{
+      position:absolute;
+      right:20px;
+      top:50%;
+      transform:translateY(-50%);
+      background:none;
+      border:0;
+      font-size:18px;
+      color:var(--muted);
+      padding:0;
+      cursor:pointer;
+    }
+
+    /* 오류 상태일 때 아이콘 색상 변경 */
+    .pill-control.is-error ~ .icon-btn{ color:var(--danger); }
+
+    /* 로그인 상태 유지 체크박스 */
+    .remember-wrap{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      margin:18px 0 24px;
+      font-size:14px;
+      color:var(--muted);
+      cursor:pointer;
+      user-select: none;
+    }
+
+    /* 커스텀 원형 체크박스 */
+    .remember-check{
+      width:22px;
+      height:22px;
+      border-radius:50%;
+      border:2px solid var(--line);
+      appearance:none;
+      display:grid;
+      place-items:center;
+      flex-shrink: 0;
+    }
+	
+	/* 체크 시 네이비색 강조 */
+    .remember-check:checked{
+      background:var(--navy);
+      border-color:var(--navy);
+    }
+
+    /* 체크 시 ✓ 표시 생성 */
+    .remember-check:checked::after{
+      content:"✓";
+      color:#fff;
+      font-size:12px;
+    }
+
+    /* 체크 시 텍스트 강조 */
+    .remember-wrap:has(.remember-check:checked){
+      color:var(--navy);
+      font-weight:600;
+    }
+
+    /* 로그인 버튼 */
+    .btn-login{
+      height:60px;
+      border-radius:28px;
+      background:var(--navy);
+      border:0;
+      font-size:17px;
+      font-weight:400;
+      transition:font-weight .2s ease;
+    }
+	
+	/* 마우스 hover 시 굵게 */
+    .btn-login:hover{
+      background:var(--navy);
+      font-weight:700 !important;
+    }
+
+    /* 아이디, 비밀번호가 모두 입력되었을 때 글씨 굵게 변환 */
+    .btn-login.is-filled,
+	.btn-login:active{ font-weight: 600 !important; }
+
+	/* 클릭, 포커스 시 스타일 고정 */
+    .btn-login:focus,
+    .btn-login:focus-visible {
+      background: var(--navy) !important;
+      box-shadow: none !important;
+      outline: none !important;
+    }
+
+    /* 하단 링크들 */
+    .link-row{
+      display:flex;
+      justify-content:space-between; /* 양 끝 정렬 */
+      margin-top:18px;
+      font-size:13px;
+    }
+
+	.link-row a{
+	  color:var(--muted);
+	  text-decoration:none;
+	  font-weight:400;
+	  transition: color .15s ease, font-weight .15s ease;
+	}
+
+	/* 링크 hover 시 강조 */
+	.link-row a:hover{
+	  color:var(--navy);
+	  font-weight:600;
+	}
+  </style>
+
+</head>
+<body>
+<div class="page-wrap">
+  <div class="login-card">
+
+    <div class="brand-title">A View of Mind</div>
+	
+	<!-- 로그인 폼 -->
+    <form method="POST" action="/login" autocomplete="off">
+		
+	  <!-- 아이디 입력 -->
+      <div class="pill-group">
+        <input
+          type="text"
+          name="username"
+          id="username"
+          class="form-control pill-control"
+          placeholder="아이디"
+        >
+        <div class="field-error">아이디가 올바르지 않습니다.</div>
+      </div>
+
+	  <!-- 비밀번호 입력 -->
+      <div class="pill-group">
+		<div class="input-wrap">
+        <input
+          type="password"
+          name="password"
+          id="password"
+          class="form-control pill-control"
+          placeholder="비밀번호"
+        >
+        <button type="button" class="icon-btn" id="togglePw">
+          <i class="bi bi-eye-slash" id="pwIcon"></i> </button>
+		</div>
+        <div class="field-error">비밀번호가 올바르지 않습니다.</div>
+      </div>
+
+	  <!-- 로그인 상태 유지 -->
+      <label class="remember-wrap">
+        <input type="checkbox" class="remember-check" name="remember-me">
+        로그인 상태 유지
+      </label>
+
+	  <!-- 로그인 버튼 -->
+      <button class="btn btn-primary w-100 btn-login" type="submit">로그인</button>
+
+	  <!-- 하단 링크 -->
+      <div class="link-row">
+		<a href="/find_account">아이디 찾기</a>
+        <a href="/signup">회원가입</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  'use strict';
+
+  // 입력 요소 및 버튼 캐싱
+  const $usernameInput = document.getElementById('username');
+  const $passwordInput = document.getElementById('password');
+  const $inputs = document.querySelectorAll('.pill-control');
+  const $pwIcon = document.getElementById('pwIcon');
+  const $togglePwButton = document.getElementById('togglePw');
+  const $loginButton = document.querySelector('.btn-login');
+
+  // 로그인 실패 후 username 복구
+  const savedUsername = new URLSearchParams(window.location.search).get('username');
+  if (savedUsername) {
+    $usernameInput.value = savedUsername;
+    $usernameInput.classList.add('is-filled');
+  }
+
+  // 아이디, 비밀번호 둘 다 입력 시 버튼에 'is-filled' 클래스를 추가하여 글꼴을 굵게 함
+  function updateLoginButtonStatus() {
+    if (!$usernameInput || !$passwordInput || !$loginButton) return;
+
+    const idFilled = $usernameInput.value.trim().length > 0;
+    const pwFilled = $passwordInput.value.trim().length > 0;
+
+    if (idFilled && pwFilled) {
+      $loginButton.classList.add('is-filled');
+    } else {
+      $loginButton.classList.remove('is-filled');
+    }
+  }
+
+  // 입력 이벤트 발생 시 호출되어 입력 필드의 시각적 상태를 관리
+  function updateInputFieldState(event) {
+    const input = event.target;
+    const isFilled = input.value.trim().length > 0;
+
+    // 텍스트 입력 유무에 따라 테두리 색상 변경
+    if (isFilled) {
+      input.classList.add('is-filled');
+    } else {
+      input.classList.remove('is-filled');
+    }
+
+    // 값이 채워지기 시작하면 이전에 적용된 오류 상태를 자동으로 해제
+    input.classList.remove('is-error');
+
+    // 비밀번호의 경우, 오류 상태가 해제되면 아이콘 색상을 기본값으로 초기화
+    if (input.id === 'password' && $pwIcon) {
+      $pwIcon.style.color = 'var(--muted)';
+    }
+
+    updateLoginButtonStatus(); // 입력 상태에 따라 로그인 버튼 굵기 업데이트
+  }
+
+
+  /* 비밀번호 보기, 숨기기 */
+  function togglePasswordVisibility() {
+    if (!$passwordInput || !$pwIcon) return;
+
+    // 현재 type이 'password'면 'text'로 변경 (보이기)
+    const show = $passwordInput.type === 'password';
+    $passwordInput.type = show ? 'text' : 'password';
+    $pwIcon.className = show ? 'bi bi-eye' : 'bi bi-eye-slash'; // 아이콘 변경 (눈 열림, 닫힘)
+
+    // 필드가 오류 상태인 경우 아이콘 색상을 Danger로 유지, 아니면 기본 색상으로 설정
+    if ($passwordInput.classList.contains('is-error')) {
+      $pwIcon.style.color = 'var(--danger)';
+    } else {
+      $pwIcon.style.color = 'var(--muted)';
+    }
+  }
+  
+  // 로그인 실패 상태 적용
+  window.triggerLoginFail = function() {
+	 // 아이디 값은 유지
+	 $usernameInput.classList.add('is-error');
+	 $usernameInput.classList.remove('is-filled');
+
+	 // 비밀번호 값 비우기
+	 $passwordInput.value = '';
+
+	 // 스타일 처리
+	 $passwordInput.classList.remove('is-filled');
+	 $passwordInput.classList.add('is-error');
+
+    // 비밀번호 아이콘 색상을 Danger로 변경
+    if ($pwIcon) {
+      $pwIcon.style.color = 'var(--danger)';
+    }
+    
+    // 버튼 굵기 업데이트 (입력 필드가 오류 상태로 바뀌면서 is-filled가 제거되었으므로 버튼 굵기도 초기화)
+    updateLoginButtonStatus(); 
+  }
+
+
+  // 초기 상태 설정 및 이벤트 리스너 연결
+  document.addEventListener('DOMContentLoaded', () => {
+    // 초기 상태 설정: 혹시 모를 캐싱이나 자동완성으로 인해 남아있을 수 있는 클래스를 제거
+    $inputs.forEach(input => {
+      input.classList.remove('is-error', 'is-filled');
+    });
+    if ($loginButton) $loginButton.classList.remove('is-filled');
+
+    // 입력 상태 이벤트 연결: 모든 입력 필드에 실시간 상태 업데이트 함수 연결
+    $inputs.forEach(input => {
+      input.addEventListener('input', updateInputFieldState);
+    });
+
+    // 비밀번호 토글 버튼 이벤트 연결
+    if ($togglePwButton) {
+      $togglePwButton.addEventListener('click', togglePasswordVisibility);
+    }
+
+    // 실제 서버 연동 시 URL에 '...login?error'가 포함되어 넘어올 경우 실패 UI를 적용
+    const params = new URLSearchParams(window.location.search);
+    if (params.has('error')) {
+      window.triggerLoginFail();
+    }
+    
+    // 초기 로드 시 버튼 상태 확인: 브라우저 자동 완성 등으로 값이 이미 채워져 있을 수 있으므로 확인
+    updateLoginButtonStatus(); 
+  });
+
+</script>
+
+</body>
+</html>

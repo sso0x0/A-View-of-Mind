@@ -1,0 +1,173 @@
+<div th:fragment="userPanel"
+     xmlns:th="http://www.thymeleaf.org"
+     xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+  <style>
+    /* =========================
+       User Panel
+    ========================= */
+    .user-panel {
+      width: 400px;
+      padding: 48px 28px;
+      background: #fff;
+      color: #13315E;
+    }
+
+    /* Header */
+    .user-panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 40px;
+    }
+
+    .user-panel-header h3 {
+      font-size: 26px;
+      font-weight: 700;
+      margin: 0;
+    }
+
+    .user-panel-close {
+      border: 1.5px solid #cfd8e6;
+      background: #fff;
+      color: #13315E;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      cursor: pointer;
+    }
+    .user-panel-close:hover {
+      font-weight: 600;
+    }
+
+    /* Info List */
+    .user-info-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .user-info-list li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 0;
+    }
+
+    .user-info-list .label {
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .user-info-list .value {
+      font-size: 18px;
+      font-weight: 500;
+    }
+
+    /* Action */
+    .user-panel-actions {
+      display: flex;
+      justify-content: center;
+      margin-top: 48px;
+    }
+
+    .btn-edit {
+      background: #13315E;
+      color: #fff;
+      padding: 16px 44px;
+      border-radius: 40px;
+      font-size: 16px;
+      font-weight: 400;
+      text-decoration: none;
+    }
+    .btn-edit:hover {
+      font-weight: 700;
+    }
+    /* Logout */
+.user-panel-logout{
+  margin-top: 24px;
+  text-align: center;
+}
+
+.btn-logout{
+  background: none;
+  border: 0;
+  padding: 0;
+  font-size: 13px;
+  color: #8b97a8; /* muted */
+  cursor: pointer;
+  font-weight: 400;
+  transition: color .15s ease, font-weight .15s ease;
+}
+
+.btn-logout:hover{
+  color: #13315E;
+  font-weight: 600;
+}
+    
+  </style>
+
+  <div id="userPanel" class="user-panel">
+
+    <!-- Header -->
+    <div class="user-panel-header">
+      <h3>내 정보</h3>
+      <button class="user-panel-close">닫기</button>
+    </div>
+
+    <!-- User Info -->
+    <ul class="user-info-list">
+      <li>
+        <span class="label">아이디</span>
+        <span class="value" sec:authentication="name"></span>
+      </li>
+      <li>
+        <span class="label">이름</span>
+        <span class="value" sec:authentication="principal.name"></span>
+      </li>
+      <li>
+        <span class="label">이메일</span>
+        <span class="value" sec:authentication="principal.email"></span>
+      </li>
+      <li>
+  		<span class="label">전화번호</span>
+  		<span class="value phone-number" sec:authentication="principal.phonenumber"></span>
+	</li>
+
+    </ul>
+
+    <!-- Action -->
+    <div class="user-panel-actions">
+      <a href="/user/edit" class="btn-edit">회원정보 수정</a>
+    </div>
+    <!-- Logout (text) -->
+	<div class="user-panel-logout">
+  	  	<form th:action="@{/logout}" method="post">
+      		<button type="submit" class="btn-logout">로그아웃</button>
+  		</form>
+	</div>
+
+  </div>
+  <script>
+  function formatPhoneNumber(phone) {
+    if (!phone) return '';
+
+    const numbers = phone.replace(/\D/g, '');
+
+    if (numbers.length === 11) {
+      return numbers.replace(/(\d{3})(\d{4})(\d{4})/, '$1-$2-$3');
+    }
+    if (numbers.length === 10) {
+      return numbers.replace(/(\d{3})(\d{3})(\d{4})/, '$1-$2-$3');
+    }
+
+    return phone;
+  }
+
+  // fragment는 삽입 후 실행돼야 함
+  const phoneEl = document.querySelector('.phone-number');
+  if (phoneEl) {
+    phoneEl.textContent = formatPhoneNumber(phoneEl.textContent);
+  }
+</script>
+</div>

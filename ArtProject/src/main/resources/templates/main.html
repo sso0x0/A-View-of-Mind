@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A View of Mind</title>
+
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <style>
+	html {
+	    overflow-y: scroll;
+	  }
+	  
+    body {
+      margin: 0;
+      background: #FDFDFD;
+      color: #13315E;
+      font-family: "inter";
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .container {
+      width: 92%;
+      max-width: 1440px;
+      margin: 0 auto;
+      box-sizing: border-box;
+    }
+
+    /* Header */
+    header {
+      padding: 28px 0;
+    }
+
+    .header-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header .header-text {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    header h1 {
+      font-size: 34px;
+      margin: 0;
+      line-height: 1.2;
+      font-weight: 700;
+    }
+
+    header p {
+      margin: 4px 0 0 0;
+      font-size: 15px;
+      color: #5a6b8c;
+      line-height: 1;
+    }
+
+    .icons {
+      display: flex;
+      align-items: center;
+      gap: 26px;
+      cursor: pointer;
+    }
+
+    .icons i, 
+    .icons svg {
+      display: block;
+      width: 28px;
+      height: 28px;
+      color: #13315E;
+    }
+
+    .user-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* 메인 배너 (Slider) */
+    .main-slider {
+      position: relative;
+      margin-top: 10px;
+    }
+
+    .main-viewport {
+      overflow: hidden;
+      border-radius: 4px;
+      cursor: grab;
+      /* 뷰포트 내 드래그 시 요소 선택 방지 */
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .main-viewport:active {
+      cursor: grabbing;
+    }
+
+    .main-track {
+      display: flex;
+    }
+
+    .main-slide {
+      position: relative;
+      min-width: 100%;
+      height: 520px;
+      background: #c1cad6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      color: #fff;
+    }
+
+    /* 이미지 드래그 고스트 현상 방지 */
+    .main-img, .card-img {
+      pointer-events: none;
+      user-select: none;
+      -webkit-user-drag: none;
+      object-fit: cover;
+    }
+
+    .main-img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .banner-link {
+      position: absolute;
+      inset: 0;
+      z-index: 3;
+      cursor: pointer;
+      -webkit-user-drag: none;
+    }
+
+    .banner-text {
+      position: relative;
+      z-index: 2;
+    }
+
+    .main-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      border: none;
+      background: none;
+      font-size: 34px;
+      cursor: pointer;
+      padding: 0 6px;
+      z-index: 10;
+    }
+
+    .main-btn.prev { left: 12px; }
+    .main-btn.next { right: 12px; }
+
+    .auto-toggle {
+      position: absolute;
+      right: 16px;
+      bottom: 16px;
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      border: none;
+      background: none;
+      color: #13315E;
+      font-size: 15px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+    }
+
+    .main-btn:hover {
+      background: rgba(255, 255, 255, .55);
+      border: 1px solid rgba(19, 49, 94, .15);
+      backdrop-filter: blur(4px);
+    }
+
+    /* 카드 슬라이더 */
+    .card-slider {
+      position: relative;
+    }
+
+    .card-viewport {
+      overflow: hidden;
+      width: 100%;
+      cursor: grab;
+      user-select: none;
+      -webkit-user-select: none;
+      touch-action: pan-y; /* 모바일에서 가로 드래그 원활하게 */
+    }
+
+    .card-viewport:active {
+      cursor: grabbing;
+    }
+
+    .card-track {
+      display: flex;
+      gap: 26px;
+      transition: transform .4s ease;
+    }
+
+    .card {
+      position: relative;
+      width: 260px;
+      height: 360px;
+      background: #c1cad6;
+      border-radius: 4px;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .card-img {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .card-link {
+      position: absolute;
+      inset: 0;
+      z-index: 4;
+      cursor: pointer;
+      -webkit-user-drag: none; /* 카드 링크 드래그 방지 */
+    }
+
+    .info-box {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      background: rgba(255, 255, 255, .92);
+      padding: 16px;
+      pointer-events: none; /* 하단 정보창 클릭 간섭 방지 */
+    }
+
+    .info-box .title { margin: 0; font-size: 16px; font-weight: 700; color: #13315E; }
+    .info-box .desc { margin: 4px 0; font-size: 14px; color: #5a6b8c; }
+    .info-box .date, .info-box .addr { margin: 0; font-size: 13px; color: #5a6b8c; }
+
+    /* 상태 뱃지 */
+    .badge {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      padding: 6px 10px;
+      font-size: 13px;
+      border-radius: 8px;
+      color: #fff;
+      font-weight: 600;
+      z-index: 10;
+    }
+
+    .badge.blue { background-color: #13315E; }
+    .badge.upcoming { background-color: rgba(19, 49, 94, 0.5); }
+    .badge.red { background-color: #e74c3c; }
+
+    /* 카드 Hover 효과 */
+    .card-hover {
+      position: absolute;
+      pointer-events: none;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity .35s ease;
+      z-index: 5;
+    }
+
+    .card-hover .hover-title {
+      color: #fff; font-size: 20px; font-weight: 700;
+      text-align: center; padding: 0 16px; line-height: 1.4;
+    }
+
+    .card:hover .card-hover { opacity: 1; }
+    .card:hover .info-box { opacity: 0.15; transition: opacity .35s ease; }
+
+    /* 슬라이드 버튼 */
+    .slide-btn.inside {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 10;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .55);
+      border: 1px solid rgba(19, 49, 94, .15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      color: #13315E;
+      backdrop-filter: blur(4px);
+      transition: all .25s ease;
+      cursor: pointer;
+    }
+
+    .slide-btn.prev.inside { left: 10px; }
+    .slide-btn.next.inside { right: 10px; }
+
+    /* 기타 요소 */
+    hr { margin: 30px 0; border: 0; border-top: 1px solid #d8dee9; }
+
+    .icons svg {
+      width: 35px; height: 35px; stroke-width: 3.0;
+      color: #13315E; transition: opacity .2s ease, transform .2s ease;
+    }
+
+    .copyright { text-align: center; margin: 120px 0 60px; font-size: 12px; color: #a2adbc; }
+
+    /* 사이드 패널 */
+    .user-panel {
+      position: fixed;
+      top: 0; right: 0; width: 360px; height: 100vh;
+      background: #fff; border-left: 1px solid #d8dee9;
+      padding: 28px; z-index: 3000;
+      transform: translateX(100%); transition: transform .35s ease;
+    }
+    .user-panel.open { transform: translateX(0); }
+
+    /* Footer */
+    .footer {
+      background: #F4F7F9; padding: 60px 0;
+      margin-top: 100px; border-top: 1px solid #d8dee9;
+    }
+
+    .footer-content {
+      display: flex; justify-content: space-between;
+      align-items: flex-start; flex-wrap: wrap; gap: 40px;
+    }
+
+    .footer-logo { font-size: 24px; font-weight: 700; margin: 0; color: #13315E; }
+    .footer-slogan { font-size: 14px; color: #5a6b8c; margin-top: 10px; }
+    .footer-links { margin-bottom: 20px; }
+    .footer-links a { text-decoration: none; color: #13315E; font-size: 14px; margin-right: 20px; }
+    .footer-links a:hover { text-decoration: underline; }
+    .footer-info p { font-size: 13px; color: #a2adbc; margin: 4px 0; line-height: 1.6; }
+    .footer-copy { margin-top: 20px !important; font-weight: 600; }
+    .footer-sns { display: flex; gap: 15px; margin-top: 15px; }
+    .footer-sns a { transition: transform 0.2s ease, opacity 0.2s ease; display: inline-block; }
+    .footer-sns a:hover { transform: translateY(-3px); opacity: 0.7; }
+    .footer-sns svg { width: 24px; height: 24px; stroke-width: 2px; color: #13315E; }
+
+    /* 모달 */
+    .modal-content { border-radius: 20px; border: none; overflow: hidden; }
+    .modal-header { border-bottom: 1px solid #f1f5f9; padding: 20px 24px; }
+    .modal-title { color: #13315E; font-weight: 700; }
+    .modal-body { padding: 24px; font-size: 14px; line-height: 1.7; color: #475569; }
+    .modal-body h6 { color: #13315E; font-weight: 700; margin-top: 20px; }
+    .modal-footer { border-top: none; padding: 16px 24px 24px; }
+    .btn-footer-close {
+      width: 100%; height: 50px; border-radius: 25px; border: none;
+      background: #f1f5f9; color: #64748b; font-weight: 600; cursor: pointer; transition: all 0.2s;
+    }
+    .btn-footer-close:hover { background: #13315E; color: #fff; }
+
+    @media (max-width: 768px) {
+      .footer-content { flex-direction: column; text-align: center; }
+      .footer-links a { margin: 0 10px; }
+    }
+	
+	body.modal-open {
+	  padding-right: 0 !important;
+	}
+
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <div class="container header-inner">
+      <div>
+        <h1>A View of Mind</h1>
+        <p>마음이 본 예술의 기록</p>
+      </div>
+      <div class="icons">
+        <span class="user-icon">
+          <i data-lucide="user"></i>
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <section class="container">
+    <div class="main-slider">
+      <div class="main-viewport">
+        <div class="main-track">
+          <!-- Thymeleaf로 배너 데이터 반복 -->
+          <div class="main-slide" th:each="banner : ${bannerExhibitions}">
+			<!-- 배너 클릭용 투명 링크 -->
+			 <a th:href="${banner.externalUrl}"
+			    target="_blank"
+			    class="banner-link"
+			    aria-label="전시 사이트 이동"></a>
+			<img class="main-img"
+			       th:src="${banner.thumbnailUrl}"
+			       alt="배너 이미지"
+				   draggable="false">
+            <div style="width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px;">
+              <h2 style="font-size: 48px; font-weight: 700; color: #fff; margin-bottom: 16px;" th:text="${banner.title}">전시명</h2>
+              <p style="font-size: 22px; color: #fff; opacity: .85; margin-bottom: 8px;" th:text="${banner.summary}">한 줄 소개</p>
+              <p style="font-size: 16px; color: #fff; opacity: .75;" th:text="${banner.venueName + ' | ' + banner.address}">장소 정보</p>
+              <p style="font-size: 14px; color: #fff; opacity: .7; margin-top: 20px;" 
+                 th:text="${#temporals.format(banner.startDate, 'yyyy.MM.dd')} + ' ~ ' + ${#temporals.format(banner.endDate, 'yyyy.MM.dd')}">
+                 기간
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button class="main-btn prev">&lt;</button>
+      <button class="main-btn next">&gt;</button>
+      <button class="auto-toggle">⸬</button>
+    </div>
+  </section>
+
+  <hr>
+
+  <!-- Card Slider -->
+  <section class="container">
+    <div class="card-slider">
+      <div class="card-viewport">
+        <div class="card-track">
+          <!-- Thymeleaf로 카드 데이터 반복 -->
+          <div class="card" th:each="ex : ${cardExhibitions}">
+			
+			<!-- 카드 전체 클릭 링크 -->
+			<a th:href="${ex.externalUrl}"
+			   target="_blank"
+			   rel="noopener noreferrer"
+			   class="card-link"
+			   aria-label="전시 공식 사이트 이동"></a>
+
+			<img class="card-img"
+			      th:src="${ex.thumbnailUrl}"
+			      alt="전시 이미지"
+				  draggable="false">
+				  <div class="card-hover">
+				    <p class="hover-title" th:text="${ex.title}">전시명</p>
+				  </div>
+            <!-- 상태 배지 -->
+			<span class="badge" 
+			      th:classappend="${ex.status == 'ONGOING' ? 'blue' : (ex.status == 'UPCOMING' ? 'upcoming' : 'red')}"
+			      th:text="${ex.status == 'ONGOING' ? '진행 중' : (ex.status == 'UPCOMING' ? '진행 예정' : '마감 임박')}">
+			  진행 중
+			</span>
+            
+            <div class="info-box">
+              <p class="title" th:text="${ex.title}">전시명</p>
+              <p class="desc" th:text="${ex.summary}">전시 한 줄 소개</p>
+              <p class="date" 
+                 th:text="${#temporals.format(ex.startDate, 'yyyy.MM.dd')} + ' ~ ' + ${#temporals.format(ex.endDate, 'yyyy.MM.dd')}">
+                 0000.00.00 ~ 0000.00.00
+              </p>
+              <p class="addr" th:text="${ex.venueName + ' | ' + ex.address}">전시 주소</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <button class="slide-btn prev inside">&lt;</button>
+      <button class="slide-btn next inside">&gt;</button>
+    </div>
+  </section>
+  <footer class="footer">
+    <div class="container footer-content">
+      <div class="footer-left">
+        <h2 class="footer-logo">A View of Mind</h2>
+        <p class="footer-slogan">마음이 본 예술의 기록, 당신의 감상을 공유하세요.</p>
+		<div class="footer-sns">
+		  <a href="https://www.instagram.com/hywoman_university/" target="_blank" title="인스타그램 바로가기">
+		    <i data-lucide="instagram"></i>
+		  </a>
+		  <a href="https://github.com/sso0x0" target="_blank" title="깃허브 바로가기">
+		      <i data-lucide="github"></i>
+		    </a>
+			<a href="mailto:hywoman@test.com" title="메일 보내기">
+			    <i data-lucide="mail"></i>
+			 </a>
+		 </div>
+	 </div>
+      
+      <div class="footer-right">
+		<div class="footer-links">
+		  <a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#termsModal">이용약관</a>
+		  <a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#policyModal" class="policy">개인정보처리방침</a>
+		  <a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#customerModal">고객센터</a>
+		  <a href="javascript:void(0)" data-bs-toggle="modal" data-bs-target="#inquiryModal">전시 등록 문의</a>
+		</div>
+        <div class="footer-info">
+          <p>한양여자대학교 빅데이터과 | 박소현</p>
+          <p>이메일: hywoman@test.com</p>
+		  <p>04763 서울특별시 성동구 살곶이길 200(사근동)</p>
+		  <p>TEL: 02-0000-0000 | FAX: 02-0000-0000</p>
+          <p class="footer-copy">Copyright &copy; 2025 A View of Mind.</p>
+        </div>
+      </div>
+    </div>
+  </footer>
+  <div class="modal fade" id="termsModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">서비스 이용 약관</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <h6>제 1조 (목적)</h6>
+          <p>본 약관은 [A View of Mind]가 제공하는 전시 기록 및 공유 서비스의 이용 조건 및 절차에 관한 사항을 규정함을 목적으로 합니다.</p>
+          <h6>제 2조 (서비스의 내용)</h6>
+          <p>회사는 전시 정보 제공, 사용자의 감상 기록 저장 및 커뮤니티 기능을 제공합니다.</p>
+          <p>- 기재된 내용은 테스트용 내용임을 안내드립니다. -</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-footer-close" data-bs-dismiss="modal">닫기</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="policyModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">개인정보처리방침</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <h6>1. 수집하는 개인정보 항목</h6>
+          <p>회사는 회원가입 시 아이디, 이메일, 이름, 휴대전화번호를 수집합니다.</p>
+          <h6>2. 개인정보의 이용 목적</h6>
+          <p>수집된 정보는 서비스 제공, 본인 확인, 고객 문의 응대를 위해 사용됩니다.</p>
+          <p>- 기재된 내용은 테스트용 내용임을 안내드립니다. -</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-footer-close" data-bs-dismiss="modal">닫기</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="modal fade" id="customerModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">고객센터</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <h6>운영 시간</h6>
+          <p>평일: 09:00 ~ 18:00 (점심시간 12:00 ~ 13:00)</p>
+          <h6>연락처</h6>
+          <p>이메일: hywoman@test.com</p>
+          <p>전화: 02-0000-0000</p>
+		  <p>- 기재된 내용은 테스트용 내용임을 안내드립니다. -</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-footer-close" data-bs-dismiss="modal">닫기</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="inquiryModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">전시 등록 문의</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <h6>전시 정보를 공유하고 싶으신가요?</h6>
+          <p>전시 명칭, 기간, 장소 등을 이메일로 보내주시면 검토 후 등록해 드립니다.</p>
+          <h6>접수처</h6>
+          <p>이메일: hywoman@test.com</p>
+		  <p>- 기재된 내용은 테스트용 내용임을 안내드립니다. -</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-footer-close" data-bs-dismiss="modal">닫기</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div th:replace="user_panel :: userPanel"></div>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    lucide.createIcons();
+
+    /* 공통 유틸리티 */
+    function getX(e) {
+      return e.touches ? e.touches[0].clientX : e.clientX;
+    }
+
+    function clamp(v, min, max) {
+      return Math.min(Math.max(v, min), max);
+    }
+
+    /* 카드 슬라이더 (개선된 드래그 로직) */
+    (() => {
+      const slider = document.querySelector('.card-slider');
+      const track = slider.querySelector('.card-track');
+      const cards = slider.querySelectorAll('.card');
+      const viewport = slider.querySelector('.card-viewport');
+      const prevBtn = slider.querySelector('.slide-btn.prev');
+      const nextBtn = slider.querySelector('.slide-btn.next');
+
+      if (!cards.length) return;
+
+      const gap = 26;
+      const cardWidth = cards[0].offsetWidth + gap;
+      
+      let current = 0;      
+      let startX = 0;       
+      let prevTranslate = 0; 
+      let dragging = false;
+      let isMoved = false;
+      const dragThreshold = 5; // 드래그로 인식할 최소 픽셀
+
+      const getMaxTranslate = () => {
+        const visibleWidth = viewport.offsetWidth;
+        const totalWidth = track.scrollWidth;
+        return Math.max(0, totalWidth - visibleWidth);
+      };
+
+      const animate = (pos) => {
+        current = clamp(pos, 0, getMaxTranslate());
+        track.style.transition = 'transform .45s cubic-bezier(.22,.61,.36,1)';
+        track.style.transform = `translateX(-${current}px)`;
+      };
+
+      const onStart = (e) => {
+        if (e.type === 'mousedown' && e.button !== 0) return;
+        
+        dragging = true;
+        isMoved = false;
+        startX = getX(e);
+        prevTranslate = current;
+        track.style.transition = 'none';
+      };
+
+      const onMove = (e) => {
+        if (!dragging) return;
+        
+        const x = getX(e);
+        const walk = startX - x;
+
+        if (Math.abs(walk) > dragThreshold) {
+          isMoved = true;
+          current = clamp(prevTranslate + walk, 0, getMaxTranslate());
+          track.style.transform = `translateX(-${current}px)`;
+        }
+      };
+
+      const onEnd = () => {
+        if (!dragging) return;
+        dragging = false;
+
+        if (isMoved) {
+          current = Math.round(current / cardWidth) * cardWidth;
+          animate(current);
+        }
+        // 드래그 종료 후 약간의 지연 시간을 두어 클릭 이벤트와 겹치지 않게 함
+        setTimeout(() => { isMoved = false; }, 50);
+      };
+
+      viewport.addEventListener('mousedown', onStart);
+      window.addEventListener('mousemove', onMove);
+      window.addEventListener('mouseup', onEnd);
+      viewport.addEventListener('touchstart', onStart, { passive: true });
+      window.addEventListener('touchmove', onMove, { passive: false });
+      window.addEventListener('touchend', onEnd);
+
+      // 클릭 이벤트 제어: 드래그 중이었다면 링크 이동 방지
+      viewport.addEventListener('click', (e) => {
+        if (isMoved) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      }, true);
+
+      nextBtn.onclick = () => animate(current + cardWidth);
+      prevBtn.onclick = () => animate(current - cardWidth);
+    })();
+
+    /* 메인 배너 슬라이더 (개선) */
+    (() => {
+      const track = document.querySelector('.main-track');
+      const slides = document.querySelectorAll('.main-slide');
+      const viewport = document.querySelector('.main-viewport');
+      const prevBtn = document.querySelector('.main-btn.prev');
+      const nextBtn = document.querySelector('.main-btn.next');
+      const toggleBtn = document.querySelector('.auto-toggle');
+
+      if (!track || !slides.length) return;
+
+      let index = 0;
+      let current = 0;
+      let startX = 0;
+      let prevTranslate = 0;
+      let dragging = false;
+      let isMoved = false;
+      let timer = null;
+      let isAuto = true;
+      const DELAY = 4000;
+
+      const getWidth = () => viewport.offsetWidth;
+
+      const move = (i) => {
+        index = clamp(i, 0, slides.length - 1);
+        current = index * getWidth();
+        track.style.transition = 'transform .7s cubic-bezier(.22,.61,.36,1)';
+        track.style.transform = `translateX(-${current}px)`;
+      };
+
+      viewport.addEventListener('mousedown', e => {
+        if (e.button !== 0) return;
+        dragging = true;
+        isMoved = false;
+        startX = getX(e);
+        prevTranslate = current;
+        track.style.transition = 'none';
+        stopAuto();
+      });
+
+      window.addEventListener('mousemove', e => {
+        if (!dragging) return;
+        const x = getX(e);
+        const walk = startX - x;
+        if (Math.abs(walk) > 5) isMoved = true;
+        current = prevTranslate + walk;
+        track.style.transform = `translateX(-${current}px)`;
+      });
+
+      window.addEventListener('mouseup', () => {
+        if (!dragging) return;
+        dragging = false;
+        const diff = current - prevTranslate;
+        if (Math.abs(diff) > getWidth() * 0.1) {
+          index += diff > 0 ? 1 : -1;
+        }
+        move(index);
+        if (isAuto) startAuto();
+        setTimeout(() => { isMoved = false; }, 50);
+      });
+
+      viewport.addEventListener('click', (e) => {
+        if (isMoved) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      }, true);
+
+      const startAuto = () => {
+        stopAuto();
+        timer = setInterval(() => {
+          let nextIndex = index + 1;
+          if (nextIndex >= slides.length) nextIndex = 0;
+          move(nextIndex);
+        }, DELAY);
+        isAuto = true;
+        toggleBtn.textContent = '⏸';
+      };
+
+      const stopAuto = () => {
+        clearInterval(timer);
+        isAuto = false;
+        toggleBtn.textContent = '▶';
+      };
+
+      nextBtn.onclick = () => { move(index + 1); stopAuto(); };
+      prevBtn.onclick = () => { move(index - 1); stopAuto(); };
+      toggleBtn.onclick = () => isAuto ? stopAuto() : startAuto();
+
+      startAuto();
+    })();
+
+    /* 유저 패널 (사이드바) 제어 */
+    document.addEventListener('DOMContentLoaded', () => {
+      const userIcon = document.querySelector('.user-icon');
+      const panel = document.getElementById('userPanel');
+      const closeBtn = panel?.querySelector('.user-panel-close');
+
+      if (!userIcon || !panel) return;
+
+      const getScrollbarWidth = () => window.innerWidth - document.documentElement.clientWidth;
+
+      userIcon.addEventListener('click', () => {
+        panel.classList.add('open');
+        document.body.style.overflow = 'hidden';
+      });
+
+      if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+          panel.classList.remove('open');
+          document.body.style.overflow = '';
+          document.body.style.paddingRight = '';
+        });
+      }
+    });
+  </script>
+</body>
+</html>
