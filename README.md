@@ -1,5 +1,5 @@
 # A View Of Mind
-![Uploading image.png…]()
+<img width="691" height="594" alt="스크린샷 2026-04-14 234952" src="https://github.com/user-attachments/assets/6d192a2b-14df-402a-99be-067f1677577b" />
 
 ## 개요
 Spring Boot를 활용하여 만든 웹 애플리케이션
