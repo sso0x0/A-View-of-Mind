@@ -1,4 +1,5 @@
 # A View Of Mind
+![Uploading image.png…]()
 
 ## 개요
 Spring Boot를 활용하여 만든 웹 애플리케이션
