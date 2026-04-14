@@ -1,8 +1,11 @@
-A View Of Mind
+# A View Of Mind
 
+## 개요
 Spring Boot를 활용하여 만든 웹 애플리케이션
 - 데이터 등록, 조회, 수정, 삭제 기능을 중심으로 구현
+- User 가입 후 전시 목록 조회
 
+## 사용 기술
 * Backend: Spring Boot
 * Language: Java
 * Database: MySQL (또는 H2)
