@@ -16,9 +16,9 @@ Spring Boot를 활용하여 만든 웹 애플리케이션
   - 배너 표시 -> 클릭 시 전시 사이트로 연결
 * 내 정보 조회 및 회원 정보 수정 <br>
 <p align="center">
-  <img src="https://github.com/user-attachments/assets/92639c6b-7960-485e-b953-65ed477a6745" width="35%" />
+  <img src="https://github.com/user-attachments/assets/92639c6b-7960-485e-b953-65ed477a6745" width="30%" />
   <img src="https://github.com/user-attachments/assets/ae8b7a68-366c-46c0-8baf-6e5d0be7d76d" width="30%" />
-  <img src="https://github.com/user-attachments/assets/60138dbc-55d9-49fe-a9e9-833429a35664" width="30%" />
+  <img src="https://github.com/user-attachments/assets/ae8b7a68-366c-46c0-8baf-6e5d0be7d76d" width="30%" />
 </p>
 
 
