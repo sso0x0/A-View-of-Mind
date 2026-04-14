@@ -14,7 +14,7 @@ Spring Boot를 활용하여 만든 웹 애플리케이션
 * Frontend: HTML, CSS, JavaScript (Thymeleaf)
 
 ## 주요 기능
-* 로그인 및 회원가입
+* 로그인 및 회원가입 <br>
   <img width="675" height="561" alt="image" src="https://github.com/user-attachments/assets/92639c6b-7960-485e-b953-65ed477a6745" /><br>
   <img width="671" height="925" alt="image" src="https://github.com/user-attachments/assets/ae8b7a68-366c-46c0-8baf-6e5d0be7d76d" /><br>
 * 전시 목록 조회
