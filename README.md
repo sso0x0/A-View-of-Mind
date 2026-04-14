@@ -2,11 +2,13 @@
 <img width="800" height="700" alt="A View of Mind - main" src="https://github.com/user-attachments/assets/a6b33e94-9c13-4529-a71e-fb23e59050ad" />
 
 ## 개요
-Spring Boot를 활용하여 만든 웹 애플리케이션
+간단 전시 목록 조회 웹 애플리케이션 서비스
+- Spring Boot를 활용하여 개발
 - 데이터 등록, 조회, 수정, 삭제 기능을 중심으로 구현
 - User 가입 후 전시 목록 조회
 
 ## 사용 기술
+* Spring Boot
 * Java
 * HTML & CSS
 
@@ -21,8 +23,6 @@ Spring Boot를 활용하여 만든 웹 애플리케이션
   <img src="https://github.com/user-attachments/assets/ae8b7a68-366c-46c0-8baf-6e5d0be7d76d" width="30%" />
 </p>
 
-
 ## 실행 방법
 1. 프로젝트 실행: Spring Boot Project - Run As - Spring Boot App
 2. 브라우저 접속: http://localhost:8080/login
-
